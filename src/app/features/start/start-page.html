@@ -1,0 +1,72 @@
+<h1 tabindex="-1">JSON Book Creator</h1>
+
+<p class="intro">
+  Create books for Foreign Reader from text and EPUB files, and edit existing JSON books. Files are
+  processed in your browser and never uploaded.
+</p>
+
+<div class="options">
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2>Import files</h2>
+      <p id="import-files-description">
+        Convert <code>.txt</code> and <code>.epub</code> files. One file opens in the editor, and
+        its <code>.to-translate.docx</code> is downloaded; several files are converted and
+        downloaded right away.
+      </p>
+      <app-file-picker-button
+        label="Import files"
+        icon="upload_file"
+        accept=".txt,.epub"
+        describedBy="import-files-description"
+        [multiple]="true"
+        [disabled]="isBusy()"
+        (filesSelected)="importFiles($event)"
+      />
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2>Edit JSON file</h2>
+      <p id="edit-json-description">
+        Open a <code>.book.json</code> file to change its title, headers and bookmarks.
+      </p>
+      <app-file-picker-button
+        label="Edit JSON file"
+        icon="edit_document"
+        accept=".json"
+        describedBy="edit-json-description"
+        [disabled]="isBusy()"
+        (filesSelected)="editJsonFile($event)"
+      />
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="status" aria-live="polite">
+  @if (batchProgress(); as progress) {
+    <p>
+      Converting {{ progress.doneCount + 1 }} of {{ progress.totalCount }}:
+      <strong>{{ progress.currentFileName }}</strong>
+    </p>
+  } @else if (isBusy()) {
+    <p>Reading the file…</p>
+  }
+
+  @if (batchResult(); as result) {
+    <p>Converted and downloaded {{ result.convertedCount }} of {{ result.totalCount }} files.</p>
+  }
+</div>
+
+@if (batchProgress()) {
+  <mat-progress-bar
+    mode="determinate"
+    [value]="batchProgressPercent()"
+    aria-label="Batch conversion progress"
+  />
+} @else if (isBusy()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Reading the file" />
+}
+
+<app-file-errors [title]="fileErrorsTitle()" [fileErrors]="fileErrors()" />

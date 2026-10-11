@@ -1,59 +1,52 @@
-# AfJsonBookCreator
+# AF JSON Book Creator
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.2.
+A browser app for creating books in the **JSON Book** format used by
+[Foreign Reader](https://andrew2020wit.github.io/foreign-reader/). It does what the
+`json-book-utils` scripts do, without Node.js or the command line. All files are processed locally in
+the browser and never uploaded.
 
-## Development server
+- **Import files** — convert `.txt` (any encoding, detected automatically) and `.epub` files into
+  `.book.json`. One file opens in the editor and its `<name>.to-translate.docx` is downloaded;
+  several files are converted and downloaded (`.book.json` + `.to-translate.docx`) at once.
+- **Edit JSON file** — change the title and headers (table of contents) of an existing book,
+  delete all its bookmarks, or import a translation into it.
+- **Save** — downloads `<name>.book.json`.
+- **Translation** — export `.to-translate.docx` for a book, translate it with the document
+  translation of Google Translate, then import the translated DOCX back (here or in the editor).
+- **Settings** — System / Light / Dark theme.
 
-To start a local development server, run:
+See [docs/SPEC.md](docs/SPEC.md) for the specification.
 
-```bash
-ng serve
-```
+## Development
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Install dependencies:
 
 ```bash
-ng build
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Start a local development server at `http://localhost:4200/`:
 
 ```bash
-ng test
+npm start
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Build the app into `dist/`:
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Run the unit tests with [Vitest](https://vitest.dev/):
 
-## Additional Resources
+```bash
+npm test
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Project structure
+
+- `src/models/` — JSON Book interfaces, kept in sync with Foreign Reader.
+- `src/app/shared/` — pure functions without Angular: text splitting, encoding detection, TXT and
+  EPUB conversion, JSON parsing and validation, translation DOCX export and import.
+- `src/app/core/` — app-wide services and UI: open book state, guards, theme, top bar, dialogs.
+- `src/app/features/` — pages: start, editor, translation, settings.

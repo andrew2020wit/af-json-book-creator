@@ -1,0 +1,101 @@
+<h1 tabindex="-1">Translation</h1>
+
+<p class="intro">
+  Export the <code>.to-translate.docx</code> file of a book, translate it with the document
+  translation of Google Translate, then import the translated file here or on the editor page. The
+  translation replaces the book's current translation.
+</p>
+
+<div class="steps">
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2 id="book-file-heading">1. Book file</h2>
+      <p id="book-file-description">The <code>.book.json</code> file the translation belongs to.</p>
+      <app-file-picker-button
+        label="Choose JSON file"
+        icon="menu_book"
+        accept=".json"
+        appearance="outlined"
+        describedBy="book-file-description"
+        [disabled]="isReading()"
+        (filesSelected)="selectBookFile($event)"
+      />
+      @if (selectedBook(); as book) {
+        <p class="selected-file">
+          <mat-icon>check_circle</mat-icon>
+          <span>
+            <strong>{{ book.fileName }}</strong>
+            <span class="details"
+              >{{ book.content.book.title }} · ID {{ book.content.book.id }}</span
+            >
+          </span>
+        </p>
+      }
+      <button
+        matButton="tonal"
+        type="button"
+        class="export-button"
+        [disabled]="!selectedBook() || isExporting()"
+        (click)="exportTranslationFile()"
+      >
+        <mat-icon>download</mat-icon>
+        Export translation file
+      </button>
+      <app-file-errors title="The book file could not be read" [fileErrors]="bookFileErrors()" />
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2 id="docx-file-heading">2. Translated DOCX</h2>
+      <p id="docx-file-description">The translated <code>.to-translate.docx</code> file.</p>
+      <app-file-picker-button
+        label="Choose DOCX file"
+        icon="description"
+        accept=".docx"
+        appearance="outlined"
+        describedBy="docx-file-description"
+        [disabled]="isReading()"
+        (filesSelected)="selectDocxFile($event)"
+      />
+      @if (selectedDocx(); as docx) {
+        <p class="selected-file">
+          <mat-icon>check_circle</mat-icon>
+          <span>
+            <strong>{{ docx.fileName }}</strong>
+            <span class="details">Book ID {{ docx.content.bookId }}</span>
+          </span>
+        </p>
+      }
+      <app-file-errors title="The DOCX file could not be read" [fileErrors]="docxFileErrors()" />
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="id-check" aria-live="polite">
+  @switch (idCheck()) {
+    @case ('match') {
+      <p class="id-match">
+        <mat-icon>verified</mat-icon>
+        The book IDs match: this is a translation of the selected book.
+      </p>
+    }
+    @case ('mismatch') {
+      <p class="id-mismatch">
+        <mat-icon>error</mat-icon>
+        The book IDs differ: this DOCX is a translation of a different book.
+      </p>
+    }
+  }
+</div>
+
+<button
+  matButton="filled"
+  type="button"
+  class="import-button"
+  [disabled]="idCheck() !== 'match'"
+  (click)="importTranslation()"
+>
+  <mat-icon>translate</mat-icon>
+  Import translation
+</button>

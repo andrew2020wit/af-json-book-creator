@@ -1,0 +1,57 @@
+.intro {
+  max-width: 65ch;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+  margin: 24px 0 16px;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+mat-card-content h2 {
+  margin-top: 8px;
+}
+
+.selected-file {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.selected-file mat-icon {
+  flex-shrink: 0;
+  color: var(--mat-sys-primary);
+}
+
+.details {
+  display: block;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.id-check p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.id-mismatch {
+  color: var(--mat-sys-error);
+}
+
+.import-button,
+.export-button {
+  min-height: 44px;
+}
+
+.export-button {
+  margin-top: 12px;
+}

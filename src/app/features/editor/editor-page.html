@@ -1,0 +1,145 @@
+<div class="page-header">
+  <h1 tabindex="-1">Edit book</h1>
+  <p class="file-name">{{ fileName() }}</p>
+</div>
+
+@if (notice(); as noticeText) {
+  <p class="notice" role="status">
+    <mat-icon>info</mat-icon>
+    <span>{{ noticeText }}</span>
+  </p>
+}
+
+<section aria-labelledby="book-heading">
+  <h2 id="book-heading">Book</h2>
+
+  <mat-form-field class="book-title-field">
+    <mat-label>Title</mat-label>
+    <input matInput [formField]="editorForm.title" />
+    @for (error of editorForm.title().errors(); track error.kind) {
+      <mat-error>{{ error.message }}</mat-error>
+    }
+  </mat-form-field>
+
+  <dl class="book-summary">
+    <div>
+      <dt>Paragraphs</dt>
+      <dd>{{ bookSummary().paragraphCount }}</dd>
+    </div>
+    <div>
+      <dt>Lines</dt>
+      <dd>{{ bookSummary().lineCount }}</dd>
+    </div>
+    <div>
+      <dt>Bookmarks</dt>
+      <dd>{{ markedItems().length }}</dd>
+    </div>
+  </dl>
+</section>
+
+<section aria-labelledby="translation-heading">
+  <h2 id="translation-heading">Translation</h2>
+  <p id="translation-description">
+    {{ translatedLineCount() }} of {{ bookSummary().lineCount }} lines have a translation. Import a
+    translated <code>.to-translate.docx</code> to replace the translation.
+  </p>
+  <div class="actions">
+    <app-file-picker-button
+      label="Import translation"
+      icon="translate"
+      accept=".docx"
+      appearance="outlined"
+      describedBy="translation-description"
+      [disabled]="isImportingTranslation()"
+      (filesSelected)="importTranslation($event)"
+    />
+  </div>
+  <app-file-errors
+    title="The translation could not be imported"
+    [fileErrors]="translationErrors()"
+  />
+</section>
+
+<section aria-labelledby="headers-heading">
+  <h2 id="headers-heading">Headers ({{ editorModel().headers.length }})</h2>
+
+  @if (editorModel().headers.length === 0) {
+    <p class="empty-text">The book has no headers.</p>
+  } @else {
+    <div role="list" aria-labelledby="headers-heading" class="header-list">
+      @for (headerField of editorForm.headers; track headerField().value().key) {
+        <app-header-row
+          [headerField]="headerField"
+          [paragraphPreview]="getParagraphPreview(headerField().value().paragraphId)"
+          (paragraphIdCommitted)="onParagraphIdCommitted($event, headerField().value().key)"
+          (deleted)="deleteHeader(headerField().value().key)"
+        />
+      }
+    </div>
+  }
+
+  <div class="actions">
+    <button matButton="tonal" type="button" class="add-header-button" (click)="addHeader()">
+      <mat-icon>add</mat-icon>
+      Add header
+    </button>
+    <button
+      matButton="outlined"
+      type="button"
+      [disabled]="editorModel().headers.length === 0"
+      (click)="deleteAllHeaders()"
+    >
+      <mat-icon>delete_sweep</mat-icon>
+      Delete all headers
+    </button>
+  </div>
+</section>
+
+<section aria-labelledby="bookmarks-heading">
+  <h2 id="bookmarks-heading">Bookmarks ({{ markedItems().length }})</h2>
+
+  <div class="actions">
+    <button
+      matButton="outlined"
+      type="button"
+      [disabled]="markedItems().length === 0"
+      (click)="deleteAllBookmarks()"
+    >
+      <mat-icon>bookmark_remove</mat-icon>
+      Delete all bookmarks
+    </button>
+  </div>
+</section>
+
+<div class="save-bar">
+  <p id="save-status" class="save-status" aria-live="polite">
+    @if (editorForm().invalid()) {
+      Fix the errors above to save the book.
+    } @else if (isDirty()) {
+      Save downloads the .book.json file.
+    } @else {
+      All changes are saved.
+    }
+  </p>
+
+  @if (saveError(); as error) {
+    <p class="save-error" role="alert">{{ error }}</p>
+  }
+
+  <div class="actions">
+    <button matButton="outlined" type="button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+    <button
+      matButton="filled"
+      type="button"
+      aria-describedby="save-status"
+      [disabled]="editorForm().invalid()"
+      (click)="save()"
+    >
+      <mat-icon>download</mat-icon>
+      Save
+    </button>
+  </div>
+</div>

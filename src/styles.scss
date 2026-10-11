@@ -7,6 +7,8 @@
 
 html {
   height: 100%;
+  // Follows the device by default; ThemeService overrides it with the user's choice.
+  color-scheme: light dark;
   @include mat.theme(
     (
       color: (
@@ -20,11 +22,6 @@ html {
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
   // variables at https://material.angular.dev/guide/system-variables
@@ -36,4 +33,23 @@ body {
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+
+h1 {
+  font: var(--mat-sys-headline-medium);
+  margin: 8px 0 16px;
+}
+
+h2 {
+  font: var(--mat-sys-title-large);
+  margin: 24px 0 12px;
+}
+
+h1:focus {
+  outline: none;
+}
+
+// When color-scheme changes while a form field is on screen (System theme following the device),
+// Chrome keeps the old light-dark() color of a label with a color transition. Animate only movement.
+.mdc-floating-label {
+  transition-property: transform !important;
+}
