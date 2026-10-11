@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { version } from '../../../../package.json';
 
 interface NavigationLink {
   path: string;
@@ -35,6 +36,7 @@ const narrowScreenQuery = '(max-width: 599.98px)';
   template: `
     <mat-toolbar class="top-bar">
       <span class="app-name">JSON Book Creator</span>
+      <span class="app-version">v{{ version }}</span>
       <span class="spacer"></span>
 
       @if (isNarrowScreen()) {
@@ -99,6 +101,12 @@ const narrowScreenQuery = '(max-width: 599.98px)';
       text-overflow: ellipsis;
     }
 
+    .app-version {
+      font: var(--mat-sys-label-medium);
+      color: var(--mat-sys-on-surface-variant);
+      white-space: nowrap;
+    }
+
     .spacer {
       flex: 1 1 auto;
     }
@@ -147,6 +155,7 @@ const narrowScreenQuery = '(max-width: 599.98px)';
 })
 export class TopBar {
   protected readonly navigationLinks = navigationLinks;
+  protected readonly version = version;
   protected readonly isMenuOpen = signal(false);
   private readonly menuButton = viewChild<ElementRef<HTMLButtonElement>>('menuButton');
 
