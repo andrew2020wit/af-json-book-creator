@@ -43,6 +43,13 @@ Run the unit tests with [Vitest](https://vitest.dev/):
 npm test
 ```
 
+Deploy the production build to GitHub Pages (the `gh-pages` branch) with
+[angular-cli-ghpages](https://github.com/angular-schule/angular-cli-ghpages):
+
+```bash
+npm run deploy
+```
+
 ## Project structure
 
 - `src/models/` — JSON Book interfaces, kept in sync with Foreign Reader.
