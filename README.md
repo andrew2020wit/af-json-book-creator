@@ -1,5 +1,7 @@
 # AF JSON Book Creator
 
+[https://andrew2020wit.github.io/af-json-book-creator/](https://andrew2020wit.github.io/af-json-book-creator/)
+
 A browser app for creating books in the **JSON Book** format used by
 [Foreign Reader](https://andrew2020wit.github.io/foreign-reader/). It does what the
 `json-book-utils` scripts do, without Node.js or the command line. All files are processed locally in
