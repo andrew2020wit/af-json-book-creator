@@ -91,13 +91,14 @@ Scenarios for later versions: pasting text without a file.
 
 ### 4.1. Start page
 
-Three options, each on its own card (two columns on wide screens, one on narrow ones):
+Three options and a link, each on its own card (two columns on wide screens, one on narrow ones):
 
 | Option               | File selection             | Result                                   |
 | -------------------- | -------------------------- | ---------------------------------------- |
 | **Import files**     | One or more `.txt`/`.epub` | 1 file → editor page; >1 → download each |
 | **Edit JSON file**   | Exactly one `.json`        | Editor page                              |
 | **Import subtitles** | — (a link to its own page) | The **Import subtitles** page (4.11)     |
+| **Foreign Reader**   | — (an external link)       | Foreign Reader opens in a new tab        |
 
 Translation import lives on a separate **Translation** page (see 4.7).
 
@@ -421,7 +422,7 @@ A separate **Settings** page. In the MVP it has one setting — the color theme:
 ### 4.10. Navigation
 
 - A shared top bar (Material `mat-toolbar`) on all pages with links: start page, Translation,
-  Settings.
+  Settings, and a GitHub icon linking to the project repository (opens in a new tab).
 - There is no link to the editor page in the bar. It is reached only by opening a book:
   - "Edit JSON file" on the start page;
   - "Import files" on the start page with one file selected;
