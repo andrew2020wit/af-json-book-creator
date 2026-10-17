@@ -42,10 +42,7 @@
   <mat-card appearance="outlined">
     <mat-card-content>
       <h2>2. Translation subtitles</h2>
-      <p id="translation-subtitles-description">
-        Subtitles in your native language. Optional: without them, a
-        <code>.to-translate.docx</code> file is downloaded to translate the book.
-      </p>
+      <p id="translation-subtitles-description">Subtitles in your native language. Optional.</p>
       <app-file-picker-button
         label="Choose translation"
         icon="translate"
@@ -99,5 +96,3 @@
   <mat-icon>auto_stories</mat-icon>
   Create book
 </button>
-
-<app-file-errors title="The book could not be created" [fileErrors]="createErrors()" />

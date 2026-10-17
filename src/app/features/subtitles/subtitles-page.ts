@@ -6,10 +6,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
 import { BookFilesService, getFileErrorMessage } from '../../core/book-files/book-files.service';
 import { BookStore } from '../../core/book-store/book-store';
-import {
-  createConvertedBookFileName,
-  createTranslationDocxFileName,
-} from '../../shared/book-json/file-names';
+import { createConvertedBookFileName } from '../../shared/book-json/file-names';
 import { subtitleFileExtensions } from '../../shared/subtitles/parse-subtitles';
 import { SubtitleItem } from '../../shared/subtitles/subtitle-item.interface';
 import { FileError, FileErrors } from '../../shared/ui/file-errors';
@@ -48,7 +45,6 @@ export class SubtitlesPage {
   protected readonly originalFileErrors = signal<FileError[]>([]);
   protected readonly translation = signal<SelectedSubtitles | null>(null);
   protected readonly translationFileErrors = signal<FileError[]>([]);
-  protected readonly createErrors = signal<FileError[]>([]);
   protected readonly isBusy = signal(false);
 
   protected selectOriginalFile(files: File[]): Promise<void> {
@@ -73,39 +69,24 @@ export class SubtitlesPage {
       return;
     }
 
-    this.createErrors.set([]);
-    this.isBusy.set(true);
+    const bookJson = this.bookFilesService.createBookFromSubtitles(
+      original.fileName,
+      original.subtitles,
+      translation?.subtitles ?? [],
+    );
+    const translatedLineCount = Object.keys(bookJson.book.translation ?? {}).length;
+    const notice = translation
+      ? `Translation from ${translation.fileName}: ${translatedLineCount} of ` +
+        `${bookJson.book.content.length} lines have a translation.`
+      : undefined;
 
-    try {
-      const bookJson = this.bookFilesService.createBookFromSubtitles(
-        original.fileName,
-        original.subtitles,
-        translation?.subtitles ?? [],
-      );
-      const bookFileName = createConvertedBookFileName(original.fileName);
-      let notice: string;
-
-      if (translation) {
-        const translatedLineCount = Object.keys(bookJson.book.translation ?? {}).length;
-
-        notice =
-          `Translation from ${translation.fileName}: ${translatedLineCount} of ` +
-          `${bookJson.book.content.length} lines have a translation.`;
-      } else {
-        // Without translation subtitles the book is translated through DOCX, as after a file import.
-        await this.bookFilesService.downloadTranslationDocx(bookJson.book, bookFileName);
-        notice = `The translation file ${createTranslationDocxFileName(bookFileName)} has been downloaded.`;
-      }
-
-      this.bookStore.open({ bookJson, fileName: bookFileName, isSaved: false, notice });
-      await this.router.navigateByUrl('/editor');
-    } catch (error) {
-      this.createErrors.set([
-        { fileName: original.fileName, messages: [getFileErrorMessage(error)] },
-      ]);
-    } finally {
-      this.isBusy.set(false);
-    }
+    this.bookStore.open({
+      bookJson,
+      fileName: createConvertedBookFileName(original.fileName),
+      isSaved: false,
+      notice,
+    });
+    await this.router.navigateByUrl('/editor');
   }
 
   private async selectFile(file: File, role: SubtitlesRole): Promise<void> {
@@ -114,7 +95,6 @@ export class SubtitlesPage {
 
     selected.set(null);
     fileErrors.set([]);
-    this.createErrors.set([]);
     this.isBusy.set(true);
 
     try {

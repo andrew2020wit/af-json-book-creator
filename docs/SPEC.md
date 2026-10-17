@@ -510,10 +510,10 @@ has no `translation`.
 
 #### After "Create book"
 
-- With translation subtitles: the book opens on the editor page with a summary ("N of M lines have a
-  translation").
-- Without them: the book's `.to-translate.docx` is downloaded right away (as for a single imported
-  file, 4.1), and the book opens on the editor page.
+- The book opens on the editor page; with translation subtitles, with a summary ("N of M lines have
+  a translation").
+- The page only imports subtitles: nothing is downloaded (no `.to-translate.docx`). A translation
+  file for the book can be exported later on the Translation page (4.7).
 - The book is unsaved until Save (4.10).
 
 ## 5. Non-functional requirements
