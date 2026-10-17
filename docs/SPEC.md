@@ -10,9 +10,9 @@ A web application for creating books in the **JSON Book** format directly in the
 JSON Book is a book format for reading in a foreign language in
 [Foreign Reader](https://andrew2020wit.github.io/foreign-reader/). Today such books are created by
 console scripts from `json-book-utils` (epub → json, txt → json, srt → json, translation
-export/import). The application does the same without Node.js or the command line, and also lets
-the user edit the title and table of contents of an existing book and import a translation into
-it.
+export/import). The application does the same without Node.js or the command line, creates books
+from movie subtitles with a translation from native-language subtitles, and also lets the user
+edit the title and table of contents of an existing book and import a translation into it.
 
 ## 2. JSON Book format
 
@@ -81,19 +81,23 @@ Key rules:
      → "Save".
 5. **Exporting a translation file for an existing book.** On the **Translation** page, select a
    `.book.json` → "Export translation file" downloads its `.to-translate.docx`.
+6. **A book from subtitles.** On the start page, "Import subtitles" → the **Import subtitles** page
+   → select the original subtitles and, optionally, subtitles in the user's native language →
+   "Create book" → the book opens on the editor page → "Save" (see 4.11).
 
-Scenarios for later versions: pasting text without a file, `.srt`.
+Scenarios for later versions: pasting text without a file.
 
 ## 4. Functional requirements
 
 ### 4.1. Start page
 
-Two main options:
+Three options, each on its own card (two columns on wide screens, one on narrow ones):
 
-| Option             | File selection             | Result                                   |
-| ------------------ | -------------------------- | ---------------------------------------- |
-| **Import files**   | One or more `.txt`/`.epub` | 1 file → editor page; >1 → download each |
-| **Edit JSON file** | Exactly one `.json`        | Editor page                              |
+| Option               | File selection             | Result                                   |
+| -------------------- | -------------------------- | ---------------------------------------- |
+| **Import files**     | One or more `.txt`/`.epub` | 1 file → editor page; >1 → download each |
+| **Edit JSON file**   | Exactly one `.json`        | Editor page                              |
+| **Import subtitles** | — (a link to its own page) | The **Import subtitles** page (4.11)     |
 
 Translation import lives on a separate **Translation** page (see 4.7).
 
@@ -421,7 +425,10 @@ A separate **Settings** page. In the MVP it has one setting — the color theme:
 - There is no link to the editor page in the bar. It is reached only by opening a book:
   - "Edit JSON file" on the start page;
   - "Import files" on the start page with one file selected;
-  - "Import translation" on the Translation page (see 4.7).
+  - "Import translation" on the Translation page (see 4.7);
+  - "Create book" on the Import subtitles page (see 4.11).
+- The Import subtitles page has no link in the bar either: it is reached from its card on the start
+  page.
 - Leaving the editor page (via the bar or Back) closes the book and discards everything unsaved from
   memory; the book can be returned to only by opening the file again.
 - If there are unsaved changes, a confirmation dialog (`MatDialog`) is shown before leaving:
@@ -429,11 +436,85 @@ A separate **Settings** page. In the MVP it has one setting — the color theme:
   dialog. Closing or reloading the tab is still handled by `beforeunload` (4.8).
 - "Unsaved changes" means any change of the title, headers, deleting bookmarks, and also an
   imported but not yet saved translation — since the book was opened or last saved. A book just
-  converted from TXT/EPUB also counts as unsaved until its first Save.
+  converted from TXT/EPUB or created from subtitles also counts as unsaved until its first Save.
 - On narrow screens the bar links collapse behind a menu button that expands them in place, inside
   the header (a disclosure). An overlay `mat-menu` was tried first, but its items are rendered
   outside the page landmarks and fail the AXE "region" check.
 - The current page is marked in the bar (`aria-current="page"`).
+
+### 4.11. Subtitle import
+
+A separate **Import subtitles** page (`/subtitles`), opened from its card on the start page. It
+creates a book for reading a movie's subtitles with a translation.
+
+#### The page
+
+1. **Original subtitles** (required) — subtitles in the language of the movie.
+2. **Translation subtitles** (optional) — subtitles in the user's native language. A selected file
+   can be removed.
+3. The **Create book** button is enabled once valid original subtitles are selected.
+
+Each file is read right after it is selected; the page shows its name and the number of subtitles,
+or an error next to the input (unsupported extension, no subtitles found, undetectable encoding).
+
+#### Formats
+
+| Format                      | Extension      | Parser                                   |
+| --------------------------- | -------------- | ---------------------------------------- |
+| SubRip                      | `.srt`         | own                                      |
+| WebVTT                      | `.vtt`         | `webvtt-parser`, as in `af-video-player` |
+| (Advanced) SubStation Alpha | `.ass`, `.ssa` | own: `Dialogue:` lines of `[Events]`     |
+| YouTube SubViewer           | `.sbv`         | own                                      |
+
+- The format is chosen by the file extension.
+- The encoding is detected as for TXT (4.2).
+- Only plain text is taken from subtitles: HTML-like tags (`<i>`, `<font color="…">`, WebVTT
+  `<c.yellow>`, `<v Bob>`, inline timestamps), ASS override blocks (`{\an8}`, `{\i1}`) are removed,
+  HTML entities (`&amp;`, `&#39;`) are decoded; in ASS, `\N`/`\n` become line breaks and `\h` a
+  space.
+- Subtitles without text after cleanup are dropped.
+- SRT, ASS/SSA and SBV subtitles are ordered by start time (ASS events may come in any order);
+  WebVTT subtitles keep the order of the file, as in the player.
+- SRT parsing tolerates a dot instead of the comma, missing hours, short fractions and missing cue
+  numbers.
+
+#### The book
+
+- One subtitle = one paragraph with one line: `<timestamp> <text>`. A multi-line subtitle is joined
+  into one line with spaces.
+- The timestamp is the subtitle's start time as `hh:mm:ss`; when the hours are zero, as `mm:ss`
+  (seconds are rounded down).
+- Paragraph `id`s are sequential from zero.
+- `id` — the current time (as in 4.2); `title` — the original subtitle file name without the
+  extension; `markedItems` and `headers` — empty arrays.
+- File name — as for a converted file (4.5), from the original subtitle file name.
+
+#### Translation
+
+Translation subtitles are matched to the original ones with the algorithm of `af-video-player`
+(`Subtitles.allSubtitles`): both lists are walked in order, and every translation subtitle not taken
+yet that starts no later than the original subtitle ends goes to that original subtitle. So a
+translation subtitle goes to the first original subtitle that ends after (or when) it starts;
+translation subtitles that start after the last original one ends are dropped.
+
+Differences from the player:
+
+- the texts of several translation subtitles matched to one original are joined with a space (the
+  player joins them without a separator);
+- a translation subtitle that starts at 0 ms is matched too (the player treats a zero start time as
+  "no subtitle" and then matches nothing at all).
+
+The matched text becomes the translation of the paragraph's line (key `` `${paragraph.id}-0` ``). A
+paragraph without matched translation subtitles gets no key; without translation subtitles the book
+has no `translation`.
+
+#### After "Create book"
+
+- With translation subtitles: the book opens on the editor page with a summary ("N of M lines have a
+  translation").
+- Without them: the book's `.to-translate.docx` is downloaded right away (as for a single imported
+  file, 4.1), and the book opens on the editor page.
+- The book is unsaved until Save (4.10).
 
 ## 5. Non-functional requirements
 
@@ -468,7 +549,7 @@ A separate **Settings** page. In the MVP it has one setting — the color theme:
 - **Performance:** a book of ~50,000 paragraphs converts and saves without a long UI freeze.
   Measured on a 5 MB TXT with 50,000 paragraphs / 250,000 lines: conversion about 0.8 s, Save about
   0.8 s, so a Web Worker is not needed.
-- **Bundle size:** heavy libraries (`jschardet`, `fflate`) are loaded lazily with a dynamic
+- **Bundle size:** heavy libraries (`jschardet`, `fflate`, `webvtt-parser`) are loaded lazily with a dynamic
   `import()` only when needed, so the initial bundle stays within the `angular.json` budgets.
 - **Accessibility (from `AGENTS.md`):** all AXE checks pass; WCAG AA minimums are met: contrast,
   focus management (after page navigation, opening/closing dialogs, re-sorting headers), keyboard
@@ -493,7 +574,9 @@ A separate **Settings** page. In the MVP it has one setting — the color theme:
   - a round trip: create DOCX → read its paragraphs → parse the translation;
   - EPUB 2 (NCX) and EPUB 3 (nav) structures; test EPUB and DOCX files are built in the tests with
     `fflate.zipSync`, small fixtures live in `src/testing/`;
-  - the editor guards (`TestBed` + router).
+  - the editor guards (`TestBed` + router);
+  - subtitle parsing (SRT, WebVTT, ASS/SSA, SBV, markup removal), matching translation subtitles,
+    timestamps and creating a book from subtitles.
 
 ## 6. Architecture (draft)
 
@@ -511,12 +594,14 @@ src/
       start/       — start page: Import files, Edit JSON file, batch conversion
       editor/      — editor page: title, headers, bookmarks, translation import, Save
       translation/ — Translation page: translation file export, DOCX selection, ID check, import
+      subtitles/   — Import subtitles page: original and translation subtitles, Create book
       settings/    — Settings page: theme (System / Light / Dark, localStorage)
     shared/
       archive/          — ZIP and XML helpers over `fflate` and `DOMParser`
       conversion/       — pure functions: encoding, text splitting, TXT → book, EPUB → book
       book-json/        — JSON parsing and validation, serialization, file names
       translation-docx/ — creating .to-translate.docx, parsing a translated DOCX → translation
+      subtitles/        — subtitle parsing, translation matching, subtitles → book
       download/         — downloading a file through the browser
       ui/               — shared UI pieces: file picker button, file error list
   testing/         — test fixtures
@@ -527,6 +612,7 @@ Routes (lazy-loaded):
 - `/` — start page;
 - `/editor` — editor page;
 - `/translation` — translation import page;
+- `/subtitles` — subtitle import page;
 - `/settings` — settings page.
 
 Conversion, parsing and validation are pure functions without Angular dependencies, so they are easy
@@ -537,7 +623,7 @@ to test and could be reused in `json-book-utils`.
 1. **MVP:** start page (Import files, Edit JSON file), `.txt` and `.epub` conversion, batch
    download, editor page for the title, headers, bookmarks and translation import, Save
    (`.book.json`), Translation page (translation file export and import), Settings page (theme).
-2. **More sources:** pasting text, `.srt`.
+2. **More sources:** subtitles (`.srt`, `.vtt`, `.ass`, `.ssa`, `.sbv`, done, see 4.11); pasting text.
 
 ## 8. Out of scope
 
@@ -555,6 +641,4 @@ to test and could be reused in `json-book-utils`.
 
 MVP — none.
 
-Deferred to later stages:
-
-- SRT: one subtitle cue = one paragraph or one line?
+Deferred to later stages — none. (Resolved: one subtitle = one paragraph with one line, see 4.11.)

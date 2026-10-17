@@ -10,6 +10,12 @@ the browser and never uploaded.
 - **Import files** — convert `.txt` (any encoding, detected automatically) and `.epub` files into
   `.book.json`. One file opens in the editor and its `<name>.to-translate.docx` is downloaded;
   several files are converted and downloaded (`.book.json` + `.to-translate.docx`) at once.
+- **Import subtitles** — create a book from movie subtitles (`.srt`, `.vtt`, `.ass`, `.ssa`,
+  `.sbv`): each subtitle becomes a paragraph that starts with its time (`mm:ss` or `hh:mm:ss`).
+  Optional subtitles in your native language become the book's translation; they are matched to
+  the original subtitles by time, the same way as in
+  [af-video-player](https://github.com/andrew2020wit/af-video-player). Only plain text is kept:
+  HTML tags and other markup are removed.
 - **Edit JSON file** — change the title and headers (table of contents) of an existing book,
   delete all its bookmarks, or import a translation into it.
 - **Save** — downloads `<name>.book.json`.
@@ -56,6 +62,7 @@ npm run deploy
 
 - `src/models/` — JSON Book interfaces, kept in sync with Foreign Reader.
 - `src/app/shared/` — pure functions without Angular: text splitting, encoding detection, TXT and
-  EPUB conversion, JSON parsing and validation, translation DOCX export and import.
+  EPUB conversion, subtitle parsing and translation matching, JSON parsing and validation,
+  translation DOCX export and import.
 - `src/app/core/` — app-wide services and UI: open book state, guards, theme, top bar, dialogs.
-- `src/app/features/` — pages: start, editor, translation, settings.
+- `src/app/features/` — pages: start, editor, translation, subtitle import, settings.

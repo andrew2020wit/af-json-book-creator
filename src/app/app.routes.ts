@@ -25,6 +25,12 @@ export const routes: Routes = [
       import('./features/translation/translation-page').then((module) => module.TranslationPage),
   },
   {
+    path: 'subtitles',
+    title: `Import subtitles · ${appName}`,
+    loadComponent: () =>
+      import('./features/subtitles/subtitles-page').then((module) => module.SubtitlesPage),
+  },
+  {
     path: 'settings',
     title: `Settings · ${appName}`,
     loadComponent: () =>

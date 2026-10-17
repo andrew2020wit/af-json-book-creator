@@ -2,8 +2,8 @@
 <h1 tabindex="-1" class="visually-hidden">Home</h1>
 
 <p class="intro">
-  Create books for Foreign Reader from text and EPUB files, and edit existing JSON books. Files are
-  processed in your browser and never uploaded.
+  Create books for Foreign Reader from text, EPUB and subtitle files, and edit existing JSON books.
+  Files are processed in your browser and never uploaded.
 </p>
 
 <div class="options">
@@ -41,6 +41,26 @@
         [disabled]="isBusy()"
         (filesSelected)="editJsonFile($event)"
       />
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2>Import subtitles</h2>
+      <p id="import-subtitles-description">
+        Create a book from movie subtitles (<code>.srt</code>, <code>.vtt</code>, <code>.ass</code>,
+        <code>.ssa</code>, <code>.sbv</code>), with a translation from subtitles in your native
+        language.
+      </p>
+      <a
+        matButton="filled"
+        class="link-button"
+        routerLink="/subtitles"
+        aria-describedby="import-subtitles-description"
+      >
+        <mat-icon>subtitles</mat-icon>
+        Import subtitles
+      </a>
     </mat-card-content>
   </mat-card>
 </div>

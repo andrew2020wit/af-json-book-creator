@@ -1,0 +1,55 @@
+.intro {
+  max-width: 65ch;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+  margin: 24px 0 16px;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+mat-card-content h2 {
+  margin-top: 8px;
+}
+
+.selected-file {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 12px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.selected-file mat-icon {
+  flex-shrink: 0;
+  color: var(--mat-sys-primary);
+}
+
+.selected-file .remove-button {
+  flex-shrink: 0;
+  margin-top: -8px;
+}
+
+.selected-file .remove-button mat-icon {
+  color: inherit;
+}
+
+.details {
+  display: block;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+mat-progress-bar {
+  margin-bottom: 16px;
+}
+
+.create-button {
+  min-height: 44px;
+}

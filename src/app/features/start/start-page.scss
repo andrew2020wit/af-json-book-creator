@@ -11,11 +11,18 @@
   max-width: 65ch;
 }
 
+// One column on narrow screens, two on wide ones: the third card goes under the first.
 .options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
   margin: 24px 0;
+}
+
+@media (min-width: 720px) {
+  .options {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 mat-card-content {
@@ -31,6 +38,10 @@ mat-card-content h2 {
 
 mat-card-content p {
   flex: 1 1 auto;
+}
+
+.link-button {
+  min-height: 44px;
 }
 
 .status p {

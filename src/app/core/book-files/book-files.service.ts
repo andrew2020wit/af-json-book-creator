@@ -5,10 +5,18 @@ import { ZipArchiveError } from '../../shared/archive/zip-archive';
 import { createTranslationDocxFileName, getFileExtension } from '../../shared/book-json/file-names';
 import { BookJsonParseResult, parseBookJson } from '../../shared/book-json/parse-book-json';
 import { serializeBookJson } from '../../shared/book-json/serialize-book-json';
-import { TextDecodingError } from '../../shared/conversion/decode-text';
+import { decodeText, TextDecodingError } from '../../shared/conversion/decode-text';
 import { convertEpubToBook, EpubConversionError } from '../../shared/conversion/epub-to-book';
 import { convertTxtToBook } from '../../shared/conversion/txt-to-book';
 import { downloadFile } from '../../shared/download/download-file';
+import {
+  isSubtitleFileName,
+  parseSubtitles,
+  subtitleFileExtensions,
+  SubtitleParseError,
+} from '../../shared/subtitles/parse-subtitles';
+import { SubtitleItem } from '../../shared/subtitles/subtitle-item.interface';
+import { convertSubtitlesToBook } from '../../shared/subtitles/subtitles-to-book';
 import { createTranslationDocx } from '../../shared/translation-docx/create-translation-docx';
 import {
   readTranslationBookId,
@@ -46,6 +54,33 @@ export class BookFilesService {
     }
 
     throw new UnsupportedFileError('Only .txt and .epub files can be imported.');
+  }
+
+  /** Reads a subtitle file in any supported format and encoding. */
+  async readSubtitleFile(file: File): Promise<SubtitleItem[]> {
+    if (!isSubtitleFileName(file.name)) {
+      throw new UnsupportedFileError(
+        `Only subtitle files can be imported: ${subtitleFileExtensions.join(', ')}.`,
+      );
+    }
+
+    const text = await decodeText(new Uint8Array(await file.arrayBuffer()));
+
+    return parseSubtitles(file.name, text);
+  }
+
+  /** Creates a JSON Book from original subtitles and, optionally, their translation. */
+  createBookFromSubtitles(
+    originalFileName: string,
+    originalSubtitles: readonly SubtitleItem[],
+    translationSubtitles: readonly SubtitleItem[],
+  ): IBookJson {
+    return convertSubtitlesToBook(
+      originalFileName,
+      originalSubtitles,
+      translationSubtitles,
+      this.createBookId(),
+    );
   }
 
   async readBookJsonFile(file: File): Promise<BookJsonParseResult> {
@@ -129,7 +164,8 @@ export function getFileErrorMessage(error: unknown): string {
   if (
     error instanceof UnsupportedFileError ||
     error instanceof TextDecodingError ||
-    error instanceof EpubConversionError
+    error instanceof EpubConversionError ||
+    error instanceof SubtitleParseError
   ) {
     return error.message;
   }

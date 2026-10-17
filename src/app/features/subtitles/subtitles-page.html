@@ -1,0 +1,103 @@
+<h1 tabindex="-1">Import subtitles</h1>
+
+<p class="intro">
+  Create a book from a movie's subtitles: each subtitle becomes a paragraph that starts with its
+  time. Subtitles in your native language, if you have them, become the book's translation.
+  Supported formats: {{ formatList }}.
+</p>
+
+<div class="steps">
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2>1. Original subtitles</h2>
+      <p id="original-subtitles-description">Subtitles in the language of the movie. Required.</p>
+      <app-file-picker-button
+        label="Choose subtitles"
+        icon="subtitles"
+        appearance="outlined"
+        describedBy="original-subtitles-description"
+        [accept]="accept"
+        [disabled]="isBusy()"
+        (filesSelected)="selectOriginalFile($event)"
+      />
+      @if (original(); as selected) {
+        <p class="selected-file">
+          <mat-icon>check_circle</mat-icon>
+          <span>
+            <strong>{{ selected.fileName }}</strong>
+            <span class="details"
+              >{{ selected.subtitles.length }}
+              {{ selected.subtitles.length === 1 ? 'subtitle' : 'subtitles' }}</span
+            >
+          </span>
+        </p>
+      }
+      <app-file-errors
+        title="The subtitle file could not be read"
+        [fileErrors]="originalFileErrors()"
+      />
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <h2>2. Translation subtitles</h2>
+      <p id="translation-subtitles-description">
+        Subtitles in your native language. Optional: without them, a
+        <code>.to-translate.docx</code> file is downloaded to translate the book.
+      </p>
+      <app-file-picker-button
+        label="Choose translation"
+        icon="translate"
+        appearance="outlined"
+        describedBy="translation-subtitles-description"
+        [accept]="accept"
+        [disabled]="isBusy()"
+        (filesSelected)="selectTranslationFile($event)"
+      />
+      @if (translation(); as selected) {
+        <div class="selected-file">
+          <mat-icon>check_circle</mat-icon>
+          <span>
+            <strong>{{ selected.fileName }}</strong>
+            <span class="details"
+              >{{ selected.subtitles.length }}
+              {{ selected.subtitles.length === 1 ? 'subtitle' : 'subtitles' }}</span
+            >
+          </span>
+          <button
+            mat-icon-button
+            type="button"
+            class="remove-button"
+            aria-label="Remove translation subtitles"
+            [disabled]="isBusy()"
+            (click)="removeTranslation()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+      <app-file-errors
+        title="The subtitle file could not be read"
+        [fileErrors]="translationFileErrors()"
+      />
+    </mat-card-content>
+  </mat-card>
+</div>
+
+@if (isBusy()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Reading subtitles" />
+}
+
+<button
+  matButton="filled"
+  type="button"
+  class="create-button"
+  [disabled]="!original() || isBusy()"
+  (click)="createBook()"
+>
+  <mat-icon>auto_stories</mat-icon>
+  Create book
+</button>
+
+<app-file-errors title="The book could not be created" [fileErrors]="createErrors()" />

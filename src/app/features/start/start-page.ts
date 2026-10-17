@@ -1,7 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { BookFilesService, getFileErrorMessage } from '../../core/book-files/book-files.service';
 import { BookStore } from '../../core/book-store/book-store';
 import {
@@ -24,7 +26,15 @@ interface BatchResult {
 
 @Component({
   selector: 'app-start-page',
-  imports: [FileErrors, FilePickerButton, MatCardModule, MatProgressBarModule],
+  imports: [
+    FileErrors,
+    FilePickerButton,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressBarModule,
+    RouterLink,
+  ],
   templateUrl: './start-page.html',
   styleUrl: './start-page.scss',
 })
